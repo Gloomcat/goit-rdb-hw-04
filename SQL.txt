@@ -1,0 +1,264 @@
+CREATE SCHEMA LibraryManagement;
+
+USE LibraryManagement;
+
+CREATE TABLE authors (
+    author_id INT AUTO_INCREMENT PRIMARY KEY,
+    author_name VARCHAR(50)
+);
+
+CREATE TABLE genres (
+    genre_id INT AUTO_INCREMENT PRIMARY KEY,
+    genre_name VARCHAR(50)
+);
+
+CREATE TABLE books (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    publication_year YEAR,
+    author_id INT,
+    genre_id INT,
+    FOREIGN KEY (author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
+);
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50),
+    email VARCHAR(50)
+);
+
+CREATE TABLE borrowed_books (
+    borrow_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    user_id INT,
+    borrow_date DATE,
+    return_date DATE,
+    FOREIGN KEY (book_id) REFERENCES books(book_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+INSERT INTO authors (author_name) 
+VALUES 
+    ('J.K. Rowling'),
+    ('George Orwell'),
+    ('Jane Austen');
+
+INSERT INTO genres (genre_name) 
+VALUES 
+    ('Fantasy'),
+    ('Dystopian'),
+    ('Romance');
+
+INSERT INTO books (title, publication_year, author_id, genre_id) 
+VALUES 
+    ('Harry Potter and the Sorcerer''s Stone', 1997, 1, 1),
+    ('1984', 1949, 2, 2),
+    ('Pride and Prejudice', 1813, 3, 3);
+
+INSERT INTO users (username, email) 
+VALUES 
+    ('john_doe', 'john_doe@example.com'),
+    ('jane_smith', 'jane_smith@example.com'),
+    ('sam_green', 'sam_green@example.com');
+
+INSERT INTO borrowed_books (book_id, user_id, borrow_date, return_date) 
+VALUES 
+    (1, 1, '2024-11-01', '2024-11-15'),
+    (2, 2, '2024-11-05', '2024-11-20'),
+    (3, 3, '2024-11-10', '2024-11-25');
+
+USE mydb;
+
+SELECT 
+    od.id AS order_detail_id,
+    o.id AS order_id,
+    c.name AS customer_name,
+    p.name AS product_name,
+    cat.name AS category_name,
+    e.first_name AS employee_first_name,
+    e.last_name AS employee_last_name,
+    s.name AS shipper_name,
+    sup.name AS supplier_name,
+    od.quantity,
+    p.price,
+    o.date AS order_date
+FROM 
+    order_details od
+INNER JOIN 
+    orders o ON od.order_id = o.id
+INNER JOIN 
+    customers c ON o.customer_id = c.id
+INNER JOIN 
+    products p ON od.product_id = p.id
+INNER JOIN 
+    categories cat ON p.category_id = cat.id
+INNER JOIN 
+    employees e ON o.employee_id = e.employee_id
+INNER JOIN 
+    shippers s ON o.shipper_id = s.id
+INNER JOIN 
+    suppliers sup ON p.supplier_id = sup.id;
+
+SELECT 
+    COUNT(*) AS total_rows
+FROM 
+    order_details od
+INNER JOIN 
+    orders o ON od.order_id = o.id
+INNER JOIN 
+    customers c ON o.customer_id = c.id
+INNER JOIN 
+    products p ON od.product_id = p.id
+INNER JOIN 
+    categories cat ON p.category_id = cat.id
+INNER JOIN 
+    employees e ON o.employee_id = e.employee_id
+INNER JOIN 
+    shippers s ON o.shipper_id = s.id
+INNER JOIN 
+    suppliers sup ON p.supplier_id = sup.id;
+
+SELECT 
+    COUNT(*) AS total_rows
+FROM 
+    order_details od
+INNER JOIN 
+    orders o ON od.order_id = o.id
+RIGHT JOIN 
+    customers c ON o.customer_id = c.id
+LEFT JOIN 
+    products p ON od.product_id = p.id
+INNER JOIN 
+    categories cat ON p.category_id = cat.id
+INNER JOIN 
+    employees e ON o.employee_id = e.employee_id
+INNER JOIN 
+    shippers s ON o.shipper_id = s.id
+INNER JOIN 
+    suppliers sup ON p.supplier_id = sup.id;
+
+-- Висновок:
+-- Кількість рядків не змінюється, у даному випадку всі необхідні зв'язки між таблицями 
+-- присутні завдяки іншим INNER JOIN, що забезпечує отримання однакової кількості рядків.
+
+SELECT 
+    od.id AS order_detail_id, o.id AS order_id,
+    c.name AS customer_name,
+    p.name AS product_name,
+    cat.name AS category_name,
+    e.employee_id AS employee_id, e.first_name AS employee_first_name, e.last_name AS employee_last_name,
+    s.name AS shipper_name,
+    sup.name AS supplier_name,
+    od.quantity,
+    p.price,
+    o.date AS order_date
+FROM 
+    order_details od
+INNER JOIN 
+    orders o ON od.order_id = o.id
+INNER JOIN 
+    customers c ON o.customer_id = c.id
+INNER JOIN 
+    products p ON od.product_id = p.id
+INNER JOIN 
+    categories cat ON p.category_id = cat.id
+INNER JOIN 
+    employees e ON o.employee_id = e.employee_id
+INNER JOIN 
+    shippers s ON o.shipper_id = s.id
+INNER JOIN 
+    suppliers sup ON p.supplier_id = sup.id
+WHERE e.employee_id > 3 AND e.employee_id <= 10;
+
+SELECT 
+    cat.name AS category_name,
+    COUNT(cat.id) AS category,
+    AVG(od.quantity) AS average_product_quantity
+FROM 
+    order_details od
+INNER JOIN 
+    orders o ON od.order_id = o.id
+INNER JOIN 
+    customers c ON o.customer_id = c.id
+INNER JOIN 
+    products p ON od.product_id = p.id
+INNER JOIN 
+    categories cat ON p.category_id = cat.id
+INNER JOIN 
+    employees e ON o.employee_id = e.employee_id
+INNER JOIN 
+    shippers s ON o.shipper_id = s.id
+INNER JOIN 
+    suppliers sup ON p.supplier_id = sup.id
+GROUP BY cat.name
+
+SELECT 
+    cat.name AS category_name,
+    COUNT(cat.id) AS category,
+    AVG(od.quantity) AS average_product_quantity
+FROM 
+    order_details od
+INNER JOIN 
+    orders o ON od.order_id = o.id
+INNER JOIN 
+    customers c ON o.customer_id = c.id
+INNER JOIN 
+    products p ON od.product_id = p.id
+INNER JOIN 
+    categories cat ON p.category_id = cat.id
+INNER JOIN 
+    employees e ON o.employee_id = e.employee_id
+INNER JOIN 
+    shippers s ON o.shipper_id = s.id
+INNER JOIN 
+    suppliers sup ON p.supplier_id = sup.id
+GROUP BY cat.name
+HAVING average_product_quantity > 21
+
+SELECT 
+    cat.name AS category_name,
+    COUNT(cat.id) AS product_variants,
+    AVG(od.quantity) AS average_product_quantity
+FROM 
+    order_details od
+INNER JOIN 
+    orders o ON od.order_id = o.id
+INNER JOIN 
+    customers c ON o.customer_id = c.id
+INNER JOIN 
+    products p ON od.product_id = p.id
+INNER JOIN 
+    categories cat ON p.category_id = cat.id
+INNER JOIN 
+    employees e ON o.employee_id = e.employee_id
+INNER JOIN 
+    shippers s ON o.shipper_id = s.id
+INNER JOIN 
+    suppliers sup ON p.supplier_id = sup.id
+GROUP BY cat.name
+ORDER BY product_variants DESC
+
+SELECT 
+    cat.name AS category_name,
+    COUNT(cat.id) AS product_variants,
+    AVG(od.quantity) AS average_product_quantity
+FROM 
+    order_details od
+INNER JOIN 
+    orders o ON od.order_id = o.id
+INNER JOIN 
+    customers c ON o.customer_id = c.id
+INNER JOIN 
+    products p ON od.product_id = p.id
+INNER JOIN 
+    categories cat ON p.category_id = cat.id
+INNER JOIN 
+    employees e ON o.employee_id = e.employee_id
+INNER JOIN 
+    shippers s ON o.shipper_id = s.id
+INNER JOIN 
+    suppliers sup ON p.supplier_id = sup.id
+GROUP BY cat.name
+ORDER BY product_variants DESC
+LIMIT 4 OFFSET 1
